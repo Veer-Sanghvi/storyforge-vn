@@ -5,12 +5,21 @@ import { StorySchema } from "@/lib/story/schema";
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "your_key_here") {
+    return Response.json(
+      { error: "OPENAI_API_KEY is not configured for this deployment." },
+      { status: 500 },
+    );
+  }
 
-  const result = streamObject({
-    model: openai("gpt-5-mini"),
-    schema: StorySchema,
-    prompt: `Create a complete branching visual novel story.
+  try {
+    const body = await request.json();
+
+    const result = streamObject({
+      model: openai("gpt-5-mini"),
+      schema: StorySchema,
+      maxOutputTokens: 6000,
+      prompt: `Create a complete branching visual novel story.
 
 Requirements:
 - Genre: ${body.genre}
@@ -24,7 +33,14 @@ Requirements:
 - Use vivid narration, concise dialogue, and visual character descriptions.
 - accentColor must be a valid hex color.
 - avatarEmoji must be a single expressive emoji.`,
-  });
+    });
 
-  return result.toTextStreamResponse();
+    const story = await result.object;
+
+    return Response.json(story);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown story generation error.";
+
+    return Response.json({ error: message }, { status: 500 });
+  }
 }

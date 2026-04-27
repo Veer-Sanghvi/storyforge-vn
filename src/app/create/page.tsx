@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { demoStory } from "@/lib/story/demo-story";
 import type { CharacterRole, Story } from "@/lib/story/types";
 import { useStoryStore } from "@/store/story-store";
 
@@ -48,6 +47,7 @@ export default function CreatePage() {
   const [step, setStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusIndex, setStatusIndex] = useState(0);
+  const [generationError, setGenerationError] = useState("");
   const [form, setForm] = useState({
     genre: "Fantasy",
     setting: "",
@@ -77,6 +77,7 @@ export default function CreatePage() {
 
   async function generateStory() {
     setIsGenerating(true);
+    setGenerationError("");
     const statusTimer = window.setInterval(() => setStatusIndex((current) => (current + 1) % statuses.length), 1100);
 
     try {
@@ -85,8 +86,12 @@ export default function CreatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, characters, length: Number(form.length) }),
       });
-      const text = await response.text();
-      const parsed = JSON.parse(text);
+      const parsed = await response.json();
+
+      if (!response.ok) {
+        throw new Error(parsed.error ?? "Story generation failed.");
+      }
+
       const story: Story = {
         ...parsed,
         id: crypto.randomUUID(),
@@ -96,19 +101,8 @@ export default function CreatePage() {
       addStory(story);
       startStory(story);
       router.push(`/story/${story.id}`);
-    } catch {
-      const fallback: Story = {
-        ...demoStory,
-        id: crypto.randomUUID(),
-        title: `${form.genre} Echoes`,
-        genre: form.genre,
-        setting: form.setting,
-        isDemo: false,
-        createdAt: new Date().toISOString(),
-      };
-      addStory(fallback);
-      startStory(fallback);
-      router.push(`/story/${fallback.id}`);
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : "Story generation failed.");
     } finally {
       window.clearInterval(statusTimer);
       setIsGenerating(false);
@@ -226,6 +220,11 @@ export default function CreatePage() {
                 ) : (
                   <ShimmerButton className="mt-8" onClick={generateStory}><Sparkles className="mr-2 size-4" />Generate My Story</ShimmerButton>
                 )}
+                {generationError ? (
+                  <div className="mt-5 rounded-lg border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-100">
+                    {generationError}
+                  </div>
+                ) : null}
               </BlurFade>
             ) : null}
           </motion.section>
