@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamObject } from "ai";
+import { generateText, Output } from "ai";
 import { StorySchema } from "@/lib/story/schema";
 
 export const runtime = "edge";
@@ -15,10 +15,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const result = streamObject({
+    const result = await generateText({
       model: openai("gpt-5-mini"),
-      schema: StorySchema,
-      maxOutputTokens: 6000,
+      output: Output.object({ schema: StorySchema }),
+      maxOutputTokens: 9000,
       prompt: `Create a complete branching visual novel story.
 
 Requirements:
@@ -35,9 +35,7 @@ Requirements:
 - avatarEmoji must be a single expressive emoji.`,
     });
 
-    const story = await result.object;
-
-    return Response.json(story);
+    return Response.json(result.output);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown story generation error.";
 

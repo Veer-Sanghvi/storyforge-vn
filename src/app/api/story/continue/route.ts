@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamObject } from "ai";
+import { generateText, Output } from "ai";
 import { ContinueChapterSchema } from "@/lib/story/schema";
 
 export const runtime = "edge";
@@ -15,10 +15,10 @@ export async function POST(request: Request) {
   try {
     const { storyContext, choiceMade, previousChapters } = await request.json();
 
-    const result = streamObject({
+    const result = await generateText({
       model: openai("gpt-5-mini"),
-      schema: ContinueChapterSchema,
-      maxOutputTokens: 2500,
+      output: Output.object({ schema: ContinueChapterSchema }),
+      maxOutputTokens: 3000,
       prompt: `Continue this AI visual novel with one new chapter.
 
 Story context:
@@ -33,9 +33,7 @@ ${JSON.stringify(previousChapters)}
 Return a single chapter with a new id, immersive scene text, narration, dialogue, 2-3 choices, and a backgroundMood.`,
     });
 
-    const chapter = await result.object;
-
-    return Response.json(chapter);
+    return Response.json(result.output);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown chapter generation error.";
 
