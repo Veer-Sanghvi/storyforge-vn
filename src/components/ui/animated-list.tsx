@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 
 export interface AnimatedListProps {
   className?: string;
@@ -44,7 +44,12 @@ export const AnimatedList = React.memo(
 AnimatedList.displayName = "AnimatedList";
 
 export function AnimatedListItem({ children }: { children: React.ReactNode }) {
-  const animations = {
+  const animations: {
+    initial: { scale: number; opacity: number };
+    animate: { scale: number; opacity: number; originY: number };
+    exit: { scale: number; opacity: number };
+    transition: Transition;
+  } = {
     initial: { scale: 0, opacity: 0 },
     animate: { scale: 1, opacity: 1, originY: 0 },
     exit: { scale: 0, opacity: 0 },

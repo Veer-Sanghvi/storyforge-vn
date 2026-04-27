@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-story: "Playfair Display", Georgia, serif;
+  --font-heading: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -82,24 +83,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --background: #0a0014;
+  --foreground: #e2d9f3;
+  --card: rgba(21, 10, 38, 0.78);
+  --card-foreground: #e2d9f3;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #a855f7;
+  --primary-foreground: #fff7ed;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: #fbbf24;
+  --accent-foreground: #160a24;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: rgba(226, 217, 243, 0.16);
+  --input: rgba(226, 217, 243, 0.18);
+  --ring: #a855f7;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -160,4 +161,47 @@
   html {
     @apply font-sans;
   }
+}
+
+@layer utilities {
+  .story-gradient {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.35), transparent 28%),
+      radial-gradient(circle at 78% 12%, rgba(37, 99, 235, 0.28), transparent 32%),
+      linear-gradient(125deg, #21003d, #0b1b55 42%, #02030a 78%);
+    background-size: 180% 180%;
+    animation: story-shift 14s ease-in-out infinite alternate;
+  }
+
+  .book-page {
+    transform-origin: left center;
+    animation: page-turn 1.2s ease-in-out infinite;
+  }
+
+  .particle-field::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.35) 0 1px, transparent 1px),
+      radial-gradient(circle, rgba(251,191,36,0.25) 0 1px, transparent 1px);
+    background-size: 34px 34px, 55px 55px;
+    animation: drift 18s linear infinite;
+    opacity: 0.38;
+  }
+}
+
+@keyframes story-shift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@keyframes page-turn {
+  0%, 100% { transform: rotateY(0deg); opacity: 0.45; }
+  50% { transform: rotateY(-72deg); opacity: 1; }
+}
+
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-55px, 34px, 0); }
 }
