@@ -74,6 +74,24 @@ export default function DemoStoryPage() {
     return chapter.stage === 1 ? 33 : chapter.stage === 2 ? 66 : 100;
   }, [chapter.stage]);
 
+  function handleChoice(nextChapterId: string) {
+    const nextChapterExists = Boolean(demoChapters[nextChapterId]);
+
+    console.log("[StoryForge demo] choice selected", {
+      currentChapterId: chapter.id,
+      nextChapterId,
+      nextChapterExists,
+    });
+
+    if (!nextChapterExists) {
+      return;
+    }
+
+    setTypedText("");
+    setIsComplete(false);
+    setChapterId(nextChapterId);
+  }
+
   useEffect(() => {
     let index = 0;
     const reset = window.setTimeout(() => {
@@ -146,7 +164,7 @@ export default function DemoStoryPage() {
                 ) : (
                   <button
                     key={choice.text}
-                    onClick={() => setChapterId(choice.next)}
+                    onClick={() => handleChoice(choice.next)}
                     className="rounded-lg border border-teal-200/25 bg-white/10 px-5 py-4 text-left font-semibold text-teal-50 transition hover:-translate-y-0.5 hover:bg-white/15"
                   >
                     {choice.text}
